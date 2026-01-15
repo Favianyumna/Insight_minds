@@ -11,6 +11,9 @@ import 'screening_page.dart';
 import '../../../risk_analysis/presentation/pages/assessment_history_page.dart';
 import '../../../risk_analysis/presentation/pages/mood_calendar_page.dart';
 import '../../../settings/presentation/pages/profile_settings_page.dart';
+import '../../../auth/presentation/pages/profile_page.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../psychology/presentation/pages/psychology_page.dart';
 import 'ai_result_page.dart';
 import '../../data/models/feature_vector.dart';
 
@@ -20,6 +23,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final answers = ref.watch(answersProvider);
+    final user = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,28 +55,61 @@ class HomePage extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       CircleAvatar(
-                        radius: 24,
+                        radius: 28,
                         backgroundColor:
                             const Color(0xFFFFFFFF).withValues(alpha: 0.15),
-                        child: const Icon(
-                          Icons.psychology_alt,
+                        child: user?.profileImagePath != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  user!.profileImagePath!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.person,
                           color: Colors.white,
-                          size: 28,
+                                size: 32,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'InsightMind Menu',
-                        style: TextStyle(
+                      Text(
+                        user?.fullName ?? 'InsightMind Menu',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (user?.email != null)
+                        Text(
+                          user!.email,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
+              // Profile link
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Profil Saya'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfilePage()),
+                  );
+                },
+              ),
+              const Divider(),
               // Tracking & Monitoring
               ListTile(
                 leading: const Icon(Icons.mood),
@@ -142,6 +179,33 @@ class HomePage extends ConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const MoodCalendarPage()),
+                  );
+                },
+              ),
+              const Divider(),
+              // Psychology & Mental Health
+              ListTile(
+                leading: const Icon(Icons.psychology),
+                title: const Text('Psikologi & Kesehatan Mental'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PsychologyPage()),
+                  );
+                },
+              ),
+              const Divider(),
+              // Settings
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Pengaturan'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ProfileSettingsPage()),
                   );
                 },
               ),
@@ -247,7 +311,7 @@ class HomePage extends ConsumerWidget {
           } else if (index == 2) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const ProfileSettingsPage()),
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
             );
           }
         },
