@@ -1,0 +1,53 @@
+==========================================
+TEMPLATE DESKRIPSI PULL REQUEST
+==========================================
+
+COPY-PASTE INI KE GITHUB:
+
+---
+
+## Deskripsi
+Update progress project Insight Minds dengan fitur baru dan perbaikan.
+
+## Perubahan yang Dibuat
+
+### ✅ Fitur Baru:
+- Tambah fitur Psikologi & Kesehatan Mental
+  - AI Chatbot Support untuk konsultasi mental
+  - Wellness Challenges untuk challenge kesehatan mental
+- Enhanced AI untuk prediksi risiko lebih akurat
+- Perbaikan mood scan camera (deteksi emosi dari kamera)
+
+### ✅ Tools & Dokumentasi:
+- Script PowerShell untuk memudahkan buat Pull Request
+- Dokumentasi lengkap Git collaboration untuk tim
+- Panduan setup untuk kontributor baru
+
+### ✅ Perbaikan:
+- Fix error 403 permission denied
+- Perbaikan mood scan camera detection
+- Update struktur project
+
+## Testing
+- [x] Fitur psikologi berfungsi dengan baik
+- [x] AI Chatbot bisa digunakan
+- [x] Wellness Challenges bisa diakses
+- [x] Mood scan camera berfungsi
+- [x] Tidak ada error saat running
+
+## Screenshot (Opsional)
+[Upload screenshot jika ada perubahan UI]
+
+---
+
+Hi @Favianyumna, mohon di-review dan di-merge jika sudah oke. Terima kasih!
+
+---
+
+==========================================
+CARA PAKAI:
+1. Copy semua teks di atas (dari "---" sampai "---")
+2. Paste di bagian "Add a description" di GitHub
+3. Edit sesuai perubahan yang Anda buat
+4. Klik "Create pull request"
+==========================================
