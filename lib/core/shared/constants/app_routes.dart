@@ -25,6 +25,7 @@ class AppRoutes {
   static const String assessmentHistory = '/assessment-history';
   static const String moodCalendar = '/mood-calendar';
   static const String assessmentForm = '/assessment-form';
+  static const String psychology = '/psychology';
 
   // Settings Routes
   static const String profileSettings = '/profile-settings';

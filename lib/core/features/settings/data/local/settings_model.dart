@@ -31,6 +31,19 @@ class SettingsModel extends HiveObject {
   @HiveField(8)
   bool? hasCompletedOnboarding;
 
+  // Assistant / LLM settings
+  @HiveField(9)
+  String? assistantApiKey;
+
+  @HiveField(10)
+  bool assistantUseExternalLLM;
+
+  @HiveField(11)
+  bool assistantVoiceEnabled;
+
+  @HiveField(12)
+  bool assistantSaveTranscript;
+
   SettingsModel({
     this.userName,
     this.userAge,
@@ -41,6 +54,10 @@ class SettingsModel extends HiveObject {
     this.riskAlertEnabled = true,
     this.darkModeEnabled = false,
     this.hasCompletedOnboarding = false,
+    this.assistantApiKey,
+    this.assistantUseExternalLLM = false,
+    this.assistantVoiceEnabled = false,
+    this.assistantSaveTranscript = true,
   });
 
   @override
@@ -74,13 +91,17 @@ class SettingsModelAdapter extends TypeAdapter<SettingsModel> {
       riskAlertEnabled: fields[6] as bool? ?? true,
       darkModeEnabled: fields[7] as bool? ?? false,
       hasCompletedOnboarding: fields[8] as bool?,
+      assistantApiKey: fields[9] as String?,
+      assistantUseExternalLLM: fields[10] as bool? ?? false,
+      assistantVoiceEnabled: fields[11] as bool? ?? false,
+      assistantSaveTranscript: fields[12] as bool? ?? true,
     );
   }
 
   @override
   void write(BinaryWriter writer, SettingsModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.userName)
       ..writeByte(1)
@@ -98,6 +119,14 @@ class SettingsModelAdapter extends TypeAdapter<SettingsModel> {
       ..writeByte(7)
       ..write(obj.darkModeEnabled)
       ..writeByte(8)
-      ..write(obj.hasCompletedOnboarding);
+      ..write(obj.hasCompletedOnboarding)
+      ..writeByte(9)
+      ..write(obj.assistantApiKey)
+      ..writeByte(10)
+      ..write(obj.assistantUseExternalLLM)
+      ..writeByte(11)
+      ..write(obj.assistantVoiceEnabled)
+      ..writeByte(12)
+      ..write(obj.assistantSaveTranscript);
   }
 }

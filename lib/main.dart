@@ -46,7 +46,7 @@ void main() async {
     // Buka box secara paralel (lebih cepat)
     Hive.openBox<ScreeningRecord>('screening_record'),
     Hive.openBox<SettingsModel>('settings'),
-    Hive.openBox<UserModel>('users'), // Fix: gunakan tipe UserModel
+    Hive.openBox('users'),
     Hive.openBox('auth_settings'),
     // Initialize date formatting (bisa berjalan paralel)
     initializeDateFormatting('id', null),

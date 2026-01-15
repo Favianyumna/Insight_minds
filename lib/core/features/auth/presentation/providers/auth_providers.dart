@@ -2,99 +2,117 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/local/user_model.dart';
 
-/// Provider for AuthRepository
+/// Simple user model used for UI scaffolding.
+class AppUser {
+  final String? profileImagePath;
+  final String? fullName;
+  final String? email;
+  final String? id;
+
+  const AppUser({this.profileImagePath, this.fullName, this.email, this.id});
+
+  factory AppUser.fromUserModel(UserModel user) {
+    return AppUser(
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      profileImagePath: user.profileImagePath,
+    );
+  }
+}
+
+/// Auth repository provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
 
-/// Provider for current user state
-final currentUserProvider = StateNotifierProvider<CurrentUserNotifier, UserModel?>((ref) {
-  return CurrentUserNotifier(ref.read(authRepositoryProvider));
-});
+/// Basic auth state notifier connected to AuthRepository
+class AuthState extends StateNotifier<AppUser?> {
+  final AuthRepository _authRepository;
 
-class CurrentUserNotifier extends StateNotifier<UserModel?> {
-  final AuthRepository _repository;
-
-  CurrentUserNotifier(this._repository) : super(null) {
+  AuthState(this._authRepository) : super(null) {
     _loadCurrentUser();
   }
 
+  /// Load current user from repository
   Future<void> _loadCurrentUser() async {
-    final user = await _repository.getCurrentUser();
-    state = user;
+    try {
+      final user = await _authRepository.getCurrentUser();
+      if (user != null) {
+        state = AppUser.fromUserModel(user);
+      }
+    } catch (e) {
+      // User not logged in or error loading
+      state = null;
+    }
   }
 
-  Future<void> login(String email, String password) async {
+  /// Login using AuthRepository
+  Future<void> login({required String email, required String password}) async {
     try {
-      final user = await _repository.login(email: email, password: password);
-      state = user;
+      final user = await _authRepository.login(
+        email: email,
+        password: password,
+      );
+      state = AppUser.fromUserModel(user);
     } catch (e) {
       rethrow;
     }
   }
 
+  /// Register using AuthRepository
   Future<void> register({
+    required String fullName,
     required String email,
     required String password,
-    required String fullName,
-    String? phoneNumber,
-    int? age,
-    String? gender,
   }) async {
     try {
-      await _repository.register(
+      final user = await _authRepository.register(
         email: email,
         password: password,
         fullName: fullName,
-        phoneNumber: phoneNumber,
-        age: age,
-        gender: gender,
       );
-      // Auto login after registration
-      await login(email, password);
+      state = AppUser.fromUserModel(user);
     } catch (e) {
       rethrow;
     }
   }
 
+  /// Logout using AuthRepository
   Future<void> logout() async {
-    await _repository.logout();
-    state = null;
+    try {
+      await _authRepository.logout();
+      state = null;
+    } catch (e) {
+      // Even if logout fails, clear local state
+      state = null;
+    }
   }
 
+  /// Update profile using AuthRepository
   Future<void> updateProfile({
     String? fullName,
-    String? phoneNumber,
-    String? bio,
-    int? age,
-    String? gender,
     String? profileImagePath,
   }) async {
-    if (state == null) return;
+    if (state == null || state!.id == null) {
+      throw Exception('User tidak login');
+    }
 
     try {
-      final updatedUser = await _repository.updateProfile(
-        userId: state!.id,
+      final updatedUser = await _authRepository.updateProfile(
+        userId: state!.id!,
         fullName: fullName,
-        phoneNumber: phoneNumber,
-        bio: bio,
-        age: age,
-        gender: gender,
         profileImagePath: profileImagePath,
       );
-      state = updatedUser;
+      state = AppUser.fromUserModel(updatedUser);
     } catch (e) {
       rethrow;
     }
-  }
-
-  Future<void> refreshUser() async {
-    await _loadCurrentUser();
   }
 }
 
-/// Provider to check if user is logged in
-final isLoggedInProvider = Provider<bool>((ref) {
-  final user = ref.watch(currentUserProvider);
-  return user != null;
+/// Provider exposing the current (logged-in) user state via StateNotifier.
+final currentUserProvider = StateNotifierProvider<AuthState, AppUser?>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return AuthState(authRepository);
 });

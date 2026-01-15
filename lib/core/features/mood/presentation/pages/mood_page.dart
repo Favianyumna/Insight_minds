@@ -4,6 +4,7 @@ import '../providers/mood_providers.dart';
 import 'mood_scan_page.dart';
 import '../../data/local/mood_entry.dart';
 import '../../../../../core/utils/haptic_feedback_helper.dart';
+import '../../../../shared/widgets/ai_bot_button.dart';
 
 class MoodPage extends ConsumerStatefulWidget {
   const MoodPage({super.key});
@@ -95,7 +96,10 @@ class _MoodPageState extends ConsumerState<MoodPage> {
     final week = ref.watch(moodWeekProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mood & Jurnal Emosi')),
+      appBar: AppBar(
+        title: const Text('Mood & Jurnal Emosi'),
+        actions: const [AiBotButton()],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/features/insightmind/presentation/pages/home_page.dart';
 import '../core/features/settings/presentation/providers/settings_providers.dart';
-import '../core/features/auth/presentation/pages/login_page.dart';
-import '../core/features/auth/presentation/pages/register_page.dart';
-import '../core/features/auth/presentation/pages/profile_page.dart';
-import '../core/features/auth/presentation/providers/auth_providers.dart';
 
 /// The main app widget that configures the application theme and initial route
 class InsightMindApp extends ConsumerWidget {
@@ -21,18 +17,10 @@ class InsightMindApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final isDarkMode = settings.darkModeEnabled;
-    final isLoggedIn = ref.watch(isLoggedInProvider);
 
     return MaterialApp(
       title: 'InsightMind',
       debugShowCheckedModeBanner: false,
-      initialRoute: isLoggedIn ? '/home' : '/login',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/home': (context) => const HomePage(),
-        '/profile': (context) => const ProfilePage(),
-      },
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -120,6 +108,7 @@ class InsightMindApp extends ConsumerWidget {
         scaffoldBackgroundColor: const Color(0xFF121212),
       ),
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: const HomePage(),
     );
   }
 }

@@ -1,5 +1,9 @@
+// ignore_for_file: duplicate_import
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:insightmind_app/core/features/auth/presentation/pages/login_page.dart';
+import 'package:insightmind_app/core/features/auth/presentation/pages/register_page.dart';
 import '../providers/score_provider.dart';
 import 'history_page.dart';
 import '../../../jadwal_kesehatan/presentation/pages/schedule_calendar_page.dart';
@@ -12,7 +16,11 @@ import '../../../risk_analysis/presentation/pages/assessment_history_page.dart';
 import '../../../risk_analysis/presentation/pages/mood_calendar_page.dart';
 import '../../../settings/presentation/pages/profile_settings_page.dart';
 import '../../../auth/presentation/pages/profile_page.dart';
+import '../../../auth/presentation/pages/login_page.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../risk_analysis/presentation/pages/assistant_bot_page.dart';
+import '../../../psychology/presentation/pages/psychology_page.dart';
+import '../../../../shared/widgets/ai_bot_button.dart';
 import 'ai_result_page.dart';
 import '../../data/models/feature_vector.dart';
 
@@ -28,6 +36,7 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('InsightMind'),
         actions: [
+          const AiBotButton(),
           IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'Riwayat Screening',
@@ -86,7 +95,7 @@ class HomePage extends ConsumerWidget {
                       ),
                       if (user?.email != null)
                         Text(
-                          user!.email,
+                          user!.email!,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 12,
@@ -102,12 +111,58 @@ class HomePage extends ConsumerWidget {
                 title: const Text('Profil Saya'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ProfilePage()),
-                  );
+                  if (user == null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfilePage()),
+                    );
+                  }
                 },
               ),
+              if (user == null)
+                ListTile(
+                  leading: const Icon(Icons.login),
+                  title: const Text('Masuk / Daftar'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                    );
+                  },
+                )
+              else
+                Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('Logout'),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await ref.read(currentUserProvider.notifier).logout();
+                        // ignore: use_build_context_synchronously
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Anda telah logout')));
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.support_agent),
+                      title: const Text('Asisten'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AssistantBotPage()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               const Divider(),
               // Tracking & Monitoring
               ListTile(
@@ -149,8 +204,35 @@ class HomePage extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.analytics),
                 title: const Text('Risk Analysis'),
+                trailing: user == null ? const Icon(Icons.lock) : null,
                 onTap: () {
                   Navigator.pop(context);
+                  if (user == null) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Autentikasi Diperlukan'),
+                        content: const Text('Fitur ini membutuhkan akun. Silakan daftar atau masuk.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage()));
+                            },
+                            child: const Text('Daftar'),
+                          ),
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                            },
+                            child: const Text('Masuk'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -161,8 +243,35 @@ class HomePage extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.assignment),
                 title: const Text('Assessment History'),
+                trailing: user == null ? const Icon(Icons.lock) : null,
                 onTap: () {
                   Navigator.pop(context);
+                  if (user == null) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Autentikasi Diperlukan'),
+                        content: const Text('Fitur ini membutuhkan akun. Silakan daftar atau masuk.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage()));
+                            },
+                            child: const Text('Daftar'),
+                          ),
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                            },
+                            child: const Text('Masuk'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -173,11 +282,51 @@ class HomePage extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.calendar_today),
                 title: const Text('Mood & Risk Calendar'),
+                trailing: user == null ? const Icon(Icons.lock) : null,
+                onTap: () {
+                  Navigator.pop(context);
+                  if (user == null) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Autentikasi Diperlukan'),
+                        content: const Text('Fitur ini membutuhkan akun. Silakan daftar atau masuk.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage()));
+                            },
+                            child: const Text('Daftar'),
+                          ),
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                            },
+                            child: const Text('Masuk'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MoodCalendarPage()),
+                  );
+                },
+              ),
+              const Divider(),
+              // Psychology & Mental Health
+              ListTile(
+                leading: const Icon(Icons.psychology),
+                title: const Text('Psikologi & Kesehatan Mental'),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const MoodCalendarPage()),
+                    MaterialPageRoute(builder: (_) => const PsychologyPage()),
                   );
                 },
               ),
@@ -227,13 +376,44 @@ class HomePage extends ConsumerWidget {
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: () {
+                      if (user == null) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Autentikasi Diperlukan'),
+                            content: const Text('Fitur ini membutuhkan akun. Silakan daftar atau masuk.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage()));
+                                },
+                                child: const Text('Daftar'),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                                },
+                                child: const Text('Masuk'),
+                              ),
+                            ],
+                          ),
+                        );
+                        return;
+                      }
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (_) => const ScreeningPage()),
                       );
                     },
-                    child: const Text('Mulai Screening'),
+                    child: user == null
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [Icon(Icons.lock), SizedBox(width: 8), Text('Mulai Screening')],
+                          )
+                        : const Text('Mulai Screening'),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
@@ -295,10 +475,17 @@ class HomePage extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const AnalyticsPage()),
             );
           } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            );
+            if (user == null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            }
           }
         },
         destinations: const [

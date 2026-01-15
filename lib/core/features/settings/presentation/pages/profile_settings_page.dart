@@ -14,6 +14,8 @@ import '../../../mood/data/local/mood_repository.dart';
 import '../../../habit/data/local/habit_repository.dart';
 import '../../../jadwal_kesehatan/data/local/schedule_repository.dart';
 import '../providers/settings_providers.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../risk_analysis/presentation/pages/assistant_bot_page.dart';
 
 class ProfileSettingsPage extends ConsumerStatefulWidget {
   const ProfileSettingsPage({super.key});
@@ -29,6 +31,10 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
   final _emergencyNameController = TextEditingController();
   final _emergencyPhoneController = TextEditingController();
 
+  // Assistant settings
+  final _apiKeyController = TextEditingController();
+  bool _obscureApiKey = true;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +47,9 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
     _ageController.text = settings.userAge?.toString() ?? '';
     _emergencyNameController.text = settings.emergencyContactName ?? '';
     _emergencyPhoneController.text = settings.emergencyContactPhone ?? '';
+
+    // Assistant settings
+    _apiKeyController.text = settings.assistantApiKey ?? '';
   }
 
   @override
@@ -49,6 +58,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
     _ageController.dispose();
     _emergencyNameController.dispose();
     _emergencyPhoneController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
   }
 
@@ -59,6 +69,14 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
     settings.emergencyContactName = _emergencyNameController.text.trim();
     settings.emergencyContactPhone = _emergencyPhoneController.text.trim();
     await settings.save();
+
+    // If a user is logged in, update the current user display name
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser != null) {
+      ref.read(currentUserProvider.notifier).updateProfile(
+        fullName: settings.userName ?? currentUser.fullName,
+      );
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -144,17 +162,16 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
           '${directory.path}/insightmind_export_${DateTime.now().millisecondsSinceEpoch}.json');
       await file.writeAsString(jsonString);
 
-      if (mounted) {
-        final messenger = ScaffoldMessenger.of(context);
-        // ignore: deprecated_member_use
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          text: 'Data Export dari InsightMind',
-        );
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Data berhasil diekspor')),
-        );
-      }
+      if (!mounted) return;
+      // ignore: deprecated_member_use
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Data Export dari InsightMind',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data berhasil diekspor')),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -450,6 +467,113 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                       await settings.save();
                       setState(() {});
                     },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Assistant Settings
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Asisten',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _apiKeyController,
+                    obscureText: _obscureApiKey,
+                    decoration: InputDecoration(
+                      labelText: 'API Key (OpenAI)',
+                      hintText: 'Masukkan API key untuk asisten (opsional)',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.vpn_key),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                            _obscureApiKey ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            _obscureApiKey = !_obscureApiKey;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    title: const Text('Gunakan LLM Eksternal'),
+                    subtitle: const Text('Kirim pertanyaan ke layanan LLM seperti OpenAI'),
+                    value: settings.assistantUseExternalLLM,
+                    onChanged: (v) async {
+                      settings.assistantUseExternalLLM = v;
+                      await settings.save();
+                      setState(() {});
+                    },
+                  ),
+                  const Divider(),
+                  SwitchListTile(
+                    title: const Text('Aktifkan Suara (TTS)'),
+                    subtitle: const Text('Bacakan jawaban asisten secara otomatis'),
+                    value: settings.assistantVoiceEnabled,
+                    onChanged: (v) async {
+                      settings.assistantVoiceEnabled = v;
+                      await settings.save();
+                      setState(() {});
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('Simpan Transkrip'),
+                    subtitle: const Text('Simpan riwayat percakapan secara lokal'),
+                    value: settings.assistantSaveTranscript,
+                    onChanged: (v) async {
+                      settings.assistantSaveTranscript = v;
+                      await settings.save();
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            // Save API key
+                            settings.assistantApiKey = _apiKeyController.text.trim();
+                            await settings.save();
+                            if (!mounted) return;
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Pengaturan Asisten disimpan')),
+                              );
+                            });
+                          },
+                          icon: const Icon(Icons.save),
+                          label: const Text('Simpan Pengaturan'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () {
+                          HapticFeedbackHelper.medium();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AssistantBotPage()),
+                          );
+                        },
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Uji Asisten'),
+                      ),
+                    ],
                   ),
                 ],
               ),

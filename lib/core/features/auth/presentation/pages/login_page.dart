@@ -2,17 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_providers.dart';
 import 'register_page.dart';
-import '../../../../utils/haptic_feedback_helper.dart';
-import '../../../../shared/widgets/auth/animated_auth_background.dart';
-import '../../../../shared/widgets/forms/custom_text_field.dart';
-import '../../../../shared/widgets/forms/password_field.dart';
-import '../../../../shared/widgets/auth/auth_error_message.dart';
-import '../../../../shared/widgets/auth/auth_submit_button.dart';
-import '../../../../shared/widgets/animations/fade_slide_transition.dart';
-import '../../../../shared/utils/validators.dart';
-import '../../../../shared/constants/app_sizes.dart';
-import '../../../../shared/constants/app_strings.dart';
-import '../../../../shared/constants/app_routes.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -25,8 +14,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  bool _loading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -35,181 +24,146 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    HapticFeedbackHelper.medium();
-
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _loading = true);
     try {
       await ref.read(currentUserProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
           );
-
-      if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppRoutes.home,
-          (route) => false,
-        );
-      }
+      if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-        _isLoading = false;
-      });
-      HapticFeedbackHelper.heavy();
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Login gagal: $e')));
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      body: AnimatedAuthBackground(
-        child: SafeArea(
+      appBar: AppBar(title: const Text('Masuk')),
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(),
+        child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.padding2XL),
-            child: FadeSlideTransition(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 40),
-
-                  // Logo and title
-                  Container(
-                    padding: const EdgeInsets.all(AppSizes.paddingXL),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 20,
-                          spreadRadius: 5,
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.indigo,
+                          child: Icon(Icons.health_and_safety, color: Colors.white, size: 32),
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.psychology_alt,
-                      size: 60,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacing2XL),
+                        const SizedBox(height: 12),
+                        Text('Selamat Datang', style: theme.textTheme.titleLarge),
+                        const SizedBox(height: 6),
+                        Text('Masuk untuk melanjutkan ke InsightMind', style: theme.textTheme.bodyMedium),
+                        const SizedBox(height: 18),
 
-                  const Text(
-                    'Selamat Datang',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppSizes.fontSize5XL,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacingSM),
-                  Text(
-                    'Masuk ke akun Anda',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppSizes.fontSizeLG,
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.spacing4XL),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return 'Email wajib diisi';
+                            final emailRegex = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+                            if (!emailRegex.hasMatch(v.trim())) return 'Format email tidak valid';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
 
-                  // Login form card
-                  Card(
-                    elevation: AppSizes.elevationLG,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radius2XL),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSizes.padding2XL),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                          ),
+                          validator: (v) => (v == null || v.length < 4) ? 'Password minimal 4 karakter' : null,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            onPressed: _loading ? null : _submit,
+                            child: _loading
+                                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Text('Masuk', style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Email field
-                            CustomTextField(
-                              label: AppStrings.email,
-                              hint: 'nama@email.com',
-                              controller: _emailController,
-                              validator: Validators.validateEmail,
-                              prefixIcon: Icons.email_outlined,
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                            ),
-                            const SizedBox(height: AppSizes.spacingXL),
-
-                            // Password field
-                            PasswordField(
-                              label: AppStrings.password,
-                              hint: 'Masukkan password',
-                              controller: _passwordController,
-                              validator: Validators.validatePassword,
-                              textInputAction: TextInputAction.done,
-                              onFieldSubmitted: (_) => _handleLogin(),
-                            ),
-                            const SizedBox(height: AppSizes.spacingMD),
-
-                            // Error message
-                            if (_errorMessage != null) ...[
-                              AuthErrorMessage(message: _errorMessage!),
-                              const SizedBox(height: AppSizes.spacing2XL),
-                            ],
-
-                            // Login button
-                            AuthSubmitButton(
-                              text: AppStrings.login,
-                              onPressed: _handleLogin,
-                              isLoading: _isLoading,
+                            const Text('Belum punya akun?'),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const RegisterPage()),
+                                );
+                              },
+                              child: const Text('Daftar'),
                             ),
                           ],
                         ),
-                      ),
+
+                        const SizedBox(height: 6),
+                        TextButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fitur lupa password belum tersedia')));
+                          },
+                          child: const Text('Lupa Password?'),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppSizes.spacing2XL),
-
-                  // Register link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Belum punya akun? ',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          HapticFeedbackHelper.selection();
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const RegisterPage(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Daftar Sekarang',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),

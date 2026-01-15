@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../providers/schedule_providers.dart';
+import '../../../../shared/widgets/ai_bot_button.dart';
 
 class ScheduleCalendarPage extends ConsumerStatefulWidget {
   const ScheduleCalendarPage({super.key});
@@ -44,6 +45,7 @@ class _ScheduleCalendarPageState extends ConsumerState<ScheduleCalendarPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Jadwal Kesehatan'),
+        actions: const [AiBotButton()],
       ),
       body: Column(
         children: [

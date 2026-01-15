@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
 import 'onboarding_page.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../../../src/app.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -104,26 +103,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _continueToApp() async {
     final settings = ref.read(settingsProvider);
     final hasCompletedOnboarding = settings.hasCompletedOnboarding ?? false;
-    final isLoggedIn = ref.read(isLoggedInProvider);
 
-    Widget targetWidget;
-    
-    if (!isLoggedIn) {
-      // If not logged in, go to login page
-      targetWidget = const InsightMindApp();
-    } else if (!hasCompletedOnboarding) {
-      // If logged in but hasn't completed onboarding
-      targetWidget = const OnboardingPage();
-    } else {
-      // If logged in and completed onboarding
-      targetWidget = const InsightMindApp();
-    }
+    final route = hasCompletedOnboarding
+        ? MaterialPageRoute(builder: (_) => const InsightMindApp())
+        : MaterialPageRoute(builder: (_) => const OnboardingPage());
 
     if (mounted) {
-      _navKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => targetWidget),
-        (r) => false,
-      );
+      _navKey.currentState?.pushAndRemoveUntil(route, (r) => false);
     }
   }
 

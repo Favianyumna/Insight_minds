@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import '../providers/risk_analysis_providers.dart';
 import '../../../mood/presentation/providers/mood_providers.dart';
 import '../../../insightmind/presentation/providers/history_providers.dart';
@@ -12,8 +13,11 @@ import '../../../habit/domain/services/habit_mood_correlation_service.dart';
 import '../../domain/entities/risk_score.dart';
 import '../../../mood/data/local/mood_entry.dart';
 import '../../../insightmind/presentation/pages/screening_page.dart';
+import '../../../mood/presentation/pages/mood_page.dart';
 import '../../../../utils/pdf_report_service.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
+import 'assistant_bot_page.dart';
+import '../../../../shared/widgets/ai_bot_button.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
@@ -26,6 +30,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedPeriod = '30 Hari';
+  DateTimeRange? _comparisonRange;
 
   @override
   void initState() {
@@ -84,6 +89,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               ),
             ),
           ),
+          const AiBotButton(),
           PopupMenuButton<String>(
             onSelected: (value) {
               setState(() {
@@ -187,6 +193,22 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                       ),
                       const SizedBox(height: 16),
                       _buildMoodStats(filteredEntries),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FilledButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const MoodPage()),
+                              );
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text('Tambah Mood'),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -214,6 +236,49 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
           return FlLine(
             color: Colors.grey.shade300,
             strokeWidth: 1,
+          );
+        },
+      ),
+      lineTouchData: LineTouchData(
+        handleBuiltInTouches: true,
+        touchCallback: (event, response) {
+          if (response == null || response.lineBarSpots == null) return;
+          final spot = response.lineBarSpots!.first;
+          final idx = spot.x.toInt();
+          if (idx < 0 || idx >= entries.length) return;
+          final entry = entries[idx];
+          if (event is! FlLongPressEnd && event is! FlPanEndEvent && event is! FlTapUpEvent) return;
+          showModalBottomSheet(
+            context: context,
+            builder: (ctx) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Detail Mood - ${DateFormat.yMMMd().format(entry.timestamp)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Mood: ${entry.effectiveMoodRating}'),
+                  if (entry.note != null) ...[
+                    const SizedBox(height: 6),
+                    Text('Catatan: ${entry.note}')
+                  ],
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Tutup'),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
           );
         },
       ),
@@ -413,6 +478,40 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                         child: LineChart(
                           _buildRiskScoreLineChart(filteredScores),
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Menyiapkan PDF...')));
+
+                              if (filteredScores.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Tidak ada data untuk diekspor')));
+                                return;
+                              }
+
+                              final last = filteredScores.last;
+                              final average = ((last.depressionRisk + last.anxietyRisk + last.burnoutRisk) / 3).round();
+                              final level = average >= 70
+                                  ? 'Tinggi'
+                                  : (average >= 40 ? 'Sedang' : 'Rendah');
+
+                              await PdfReportService.generateAndSharePatientReport(
+                                patientName: 'InsightMind User',
+                                patientAge: 0,
+                                generatedAt: DateTime.now(),
+                                screeningScore: average,
+                                screeningRiskLevel: level,
+                              );
+                            },
+                            icon: const Icon(Icons.picture_as_pdf),
+                            label: const Text('Ekspor PDF'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1106,6 +1205,32 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
               content,
               style: const TextStyle(fontSize: 14),
             ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  tooltip: 'Salin insight',
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: content));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Insight disalin')));
+                  },
+                  icon: const Icon(Icons.copy),
+                ),
+                IconButton(
+                  tooltip: 'Tanyakan ke asisten',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => AssistantBotPage(initialMessage: content)),
+                    );
+                  },
+                  icon: const Icon(Icons.support_agent),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1282,23 +1407,65 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Perbandingan Minggu',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Perbandingan Periode',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              final picked = await showDateRangePicker(
+                                context: context,
+                                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                lastDate: DateTime.now(),
+                                initialDateRange: _comparisonRange,
+                              );
+                              if (picked != null) {
+                                setState(() => _comparisonRange = picked);
+                              }
+                            },
+                            icon: const Icon(Icons.date_range),
+                            label: const Text('Pilih Periode'),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      _buildComparisonRow(
-                          'Mood Rata-rata', thisWeek, lastWeek, 'mood'),
                       const SizedBox(height: 12),
-                      _buildComparisonRow(
-                          'Tidur Rata-rata', thisWeek, lastWeek, 'sleep'),
-                      const SizedBox(height: 12),
-                      _buildComparisonRow(
-                          'Aktivitas Fisik', thisWeek, lastWeek, 'activity'),
-                      const SizedBox(height: 12),
-                      _buildComparisonRow(
-                          'Interaksi Sosial', thisWeek, lastWeek, 'social'),
+                      Builder(builder: (c) {
+                        List<MoodEntry> periodA = thisWeek;
+                        List<MoodEntry> periodB = lastWeek;
+                        if (_comparisonRange != null) {
+                          final start = _comparisonRange!.start;
+                          final end = _comparisonRange!.end;
+                          final len = end.difference(start).inDays + 1;
+                          periodA = moodEntries
+                              .where((e) =>
+                                  !e.timestamp.isBefore(start) &&
+                                  !e.timestamp.isAfter(end))
+                              .toList();
+                          final prevStart = start.subtract(Duration(days: len));
+                          final prevEnd = start.subtract(const Duration(days: 1));
+                          periodB = moodEntries
+                              .where((e) =>
+                                  !e.timestamp.isBefore(prevStart) &&
+                                  !e.timestamp.isAfter(prevEnd))
+                              .toList();
+                        }
+                        return Column(
+                          children: [
+                            _buildComparisonRow('Mood Rata-rata', periodA, periodB, 'mood'),
+                            const SizedBox(height: 12),
+                            _buildComparisonRow('Tidur Rata-rata', periodA, periodB, 'sleep'),
+                            const SizedBox(height: 12),
+                            _buildComparisonRow('Aktivitas Fisik', periodA, periodB, 'activity'),
+                            const SizedBox(height: 12),
+                            _buildComparisonRow('Interaksi Sosial', periodA, periodB, 'social'),
+                          ],
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -1617,6 +1784,36 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          final stats = _calculateAdvancedStats(moodEntries);
+                          final text = stats.entries
+                              .map((e) => '${e.key}: ${e.value}')
+                              .join('\n');
+                          Clipboard.setData(ClipboardData(text: text));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Statistik disalin')));
+                        },
+                        icon: const Icon(Icons.copy),
+                        label: const Text('Salin Statistik'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          final csv = _generateCSV(moodEntries, riskScore);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('CSV siap (preview):\n${csv.substring(0, csv.length > 120 ? 120 : csv.length)}...')),
+                          );
+                        },
+                        icon: const Icon(Icons.download),
+                        label: const Text('Ekspor CSV'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Card(
@@ -2019,13 +2216,28 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                                   Icon(Icons.insights,
                                       color: Colors.purple.shade700),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    'Analisis Habit-Mood Correlation',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.purple.shade900,
+                                  Expanded(
+                                    child: Text(
+                                      'Analisis Habit-Mood Correlation',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.purple.shade900,
+                                      ),
                                     ),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Refresh analisis',
+                                    onPressed: () async {
+                                      final messenger = ScaffoldMessenger.of(context);
+                                      messenger.showSnackBar(const SnackBar(content: Text('Memperbarui analisis...')));
+                                      // Await refresh and ignore returned value
+                                      // ignore: unused_local_variable
+                                      final _ = await ref.refresh(habitMoodCorrelationProvider.future);
+                                      if (!mounted) return;
+                                      messenger.showSnackBar(const SnackBar(content: Text('Analisis diperbarui')));
+                                    },
+                                    icon: const Icon(Icons.refresh),
                                   ),
                                 ],
                               ),

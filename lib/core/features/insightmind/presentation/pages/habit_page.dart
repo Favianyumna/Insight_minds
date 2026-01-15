@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/habit_providers.dart';
-import '../../data/local/habit_entry.dart';
-import '../../../settings/presentation/providers/settings_providers.dart';
-import '../../../risk_analysis/data/llm_service.dart';
-import '../../../../shared/widgets/ai_bot_button.dart';
+import '../../../habit/data/local/habit_entry.dart';
 
 class HabitPage extends ConsumerWidget {
   const HabitPage({super.key});
@@ -19,7 +14,6 @@ class HabitPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Habit Tracker'),
         actions: [
-          const AiBotButton(),
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'Tambah Habit',
@@ -195,106 +189,10 @@ class HabitPage extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Nama Habit',
             hintText: 'Contoh: Olahraga pagi, Minum air 8 gelas',
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              tooltip: 'Tanyakan Asisten',
-              icon: const Icon(Icons.smart_toy_outlined),
-              onPressed: () async {
-                // Use assistant to parse the command and optionally create a habit
-                final input = controller.text.trim();
-                if (input.isEmpty) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('Isi nama atau perintah terlebih dahulu')),
-                    );
-                  }
-                  return;
-                }
-
-                // determine settings
-                final settings = ref.read(settingsProvider);
-                final useExternal = settings.assistantUseExternalLLM && (settings.assistantApiKey?.isNotEmpty ?? false);
-
-                String rawReply = '';
-                try {
-                  if (useExternal) {
-                    final svc = LlmService(apiKey: settings.assistantApiKey!);
-                    const systemPrompt = 'Anda adalah parser yang mengekstrak instruksi pembuatan habit. ' 
-                        'Berikan RESPON dalam format JSON saja, contoh: {"action":"create_habit","title":"Minum air 8 gelas","notes":"pagi"} ' 
-                        'Jika tidak ada perintah pembuatan habit, respon: {"action":"none"}';
-                    rawReply = await svc.chatCompletion(input, systemPrompt: systemPrompt, maxTokens: 200);
-                  } else {
-                    // Simple heuristic fallback: always create a habit using raw text
-                    rawReply = jsonEncode({'action': 'create_habit', 'title': input});
-                  }
-                } catch (e) {
-                  rawReply = jsonEncode({'action': 'none'});
-                }
-
-                // Try to parse JSON from assistant
-                try {
-                  final parsed = jsonDecode(rawReply);
-                  final action = parsed['action'] as String? ?? 'none';
-                  if (action == 'create_habit') {
-                    final title = (parsed['title'] as String?)?.trim() ?? input;
-                    // create habit
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (context.mounted) Navigator.of(context).pop();
-                    });
-                    ref.read(isSavingHabitProvider.notifier).state = true;
-                    try {
-                      await ref.read(habitRepositoryProvider).add(title: title);
-                      // ignore: unused_result
-                      ref.refresh(habitListProvider);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Habit berhasil ditambahkan oleh Asisten')),
-                          );
-                        }
-                      });
-                    } catch (e) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
-                          );
-                        }
-                      });
-                    } finally {
-                      ref.read(isSavingHabitProvider.notifier).state = false;
-                    }
-                    return;
-                  } else {
-                    // show assistant reply if no action
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      showDialog(
-                        context: ctx,
-                        builder: (dCtx) => AlertDialog(
-                          title: const Text('Asisten mengatakan'),
-                          content: Text(rawReply),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(dCtx), child: const Text('Tutup')),
-                          ],
-                        ),
-                      );
-                    });
-                    return;
-                  }
-                } catch (_) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Asisten tidak mengerti perintah')),
-                      );
-                    }
-                  });
-                }
-              },
-            ),
+            border: OutlineInputBorder(),
           ),
         ),
         actions: [

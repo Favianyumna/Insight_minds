@@ -5,6 +5,7 @@ import '../../domain/entities/risk_score.dart';
 import '../../domain/entities/pattern_alert.dart';
 import 'assessment_form_page.dart';
 import '../../../insightmind/domain/entities/question.dart';
+import '../../../../shared/widgets/ai_bot_button.dart';
 
 class RiskDashboardPage extends ConsumerWidget {
   const RiskDashboardPage({super.key});
@@ -18,6 +19,7 @@ class RiskDashboardPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Risk Analysis'),
         actions: [
+          const AiBotButton(),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
