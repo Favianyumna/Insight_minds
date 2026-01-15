@@ -18,8 +18,8 @@ SETELAH EDIT CODE:
    - Buka: https://github.com/captAgung/Insight_minds
    - Klik tombol hijau "Contribute"
    - Klik "Open Pull Request"
-   - Isi judul: "feat: [nama fitur]"
-   - Isi deskripsi perubahan
+   - Isi judul: "feat: Update progress - fitur psikologi, enhanced AI, dan tools"
+   - Isi deskripsi: Copy dari file TEMPLATE_DESKRIPSI_PR.txt
    - Tulis: @Favianyumna mohon di-review
    - Klik "Create Pull Request"
 
