@@ -1,0 +1,31 @@
+==========================================
+CARA BUAT PULL REQUEST (captAgung)
+==========================================
+
+SETELAH EDIT CODE:
+
+1. COMMIT & PUSH:
+   git add .
+   git commit -m "feat: deskripsi perubahan"
+   git push origin main
+
+2. BUAT PULL REQUEST:
+   
+   OPSI A - Pakai Script (Paling Mudah):
+   .\BUAT_PULL_REQUEST.ps1
+   
+   OPSI B - Manual:
+   - Buka: https://github.com/captAgung/Insight_minds
+   - Klik tombol hijau "Contribute"
+   - Klik "Open Pull Request"
+   - Isi judul: "feat: [nama fitur]"
+   - Isi deskripsi perubahan
+   - Tulis: @Favianyumna mohon di-review
+   - Klik "Create Pull Request"
+
+3. SELESAI!
+   - Favian akan dapat notifikasi
+   - Setelah di-merge, nama captAgung akan muncul di Contributors
+   - Dosen bisa lihat di: https://github.com/Favianyumna/Insight_minds/graphs/contributors
+
+==========================================
