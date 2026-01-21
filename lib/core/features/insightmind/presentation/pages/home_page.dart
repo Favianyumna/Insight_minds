@@ -983,7 +983,6 @@ class _AIPredictionDialog extends ConsumerWidget {
     dynamic latestAssessment,
     dynamic riskScore,
   ) {
-    // Mood score interpretation: 1-3 = poor, 4-6 = moderate, 7-10 = good
     String moodStatus = avgMoodScore < 4
         ? 'rendah'
         : avgMoodScore < 7
