@@ -15,10 +15,8 @@ import 'core/features/settings/domain/services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize timezone (synchronous, fast)
   tz.initializeTimeZones();
 
-  // WEEK6: Inisialisasi Hive untuk Flutter (buat direktori penyimpanan)
   await Hive.initFlutter();
 
   // Registrasi adapter (synchronous, fast)
@@ -41,22 +39,15 @@ void main() async {
     Hive.registerAdapter(UserModelAdapter());
   }
 
-  // Jalankan operasi async secara paralel untuk mempercepat loading
   await Future.wait([
-    // Buka box secara paralel (lebih cepat)
     Hive.openBox<ScreeningRecord>('screening_record'),
     Hive.openBox<SettingsModel>('settings'),
     Hive.openBox<UserModel>('users'),
     Hive.openBox('auth_settings'),
-    // Initialize date formatting (bisa berjalan paralel)
     initializeDateFormatting('id', null),
   ]);
 
-  // Render UI secepat mungkin
   runApp(const ProviderScope(child: SplashScreen()));
 
-  // Inisialisasi notifikasi secara non-blocking setelah UI tampil
-  // Menghindari hang di sebagian perangkat saat meminta izin notifikasi
-  // ignore: unawaited_futures
   NotificationService().initialize();
 }

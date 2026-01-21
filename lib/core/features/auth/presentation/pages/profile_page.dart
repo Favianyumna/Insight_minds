@@ -20,479 +20,453 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue.shade600,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Profil Saya',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Solid Color Header
+            // Header dengan Gradient
             Container(
-              height: 120,
-              color: Colors.blue.shade600,
-            ),
-            // Profile Card with overlap effect
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Transform.translate(
-                offset: const Offset(0, -60),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation: 8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        // Avatar with status indicator
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.grey.shade200,
-                              backgroundImage: user?.profileImagePath != null
-                                  ? NetworkImage(user!.profileImagePath!)
-                                  : null,
-                              child: user?.profileImagePath == null
-                                  ? Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.indigo.shade600,
-                                    )
-                                  : null,
-                            ),
-                            // Green online indicator
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 3,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Red notification dot
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // User name
-                        Text(
-                          user?.fullName ?? settings.userName ?? 'Sarah Anderson',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 4),
-                        // Member since
-                        Text(
-                          'Member sejak 2024',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Email with icon
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.email_outlined,
-                              size: 18,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                user?.email ?? 'sarah.anderson@email.com',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Location with icon
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 18,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Jakarta, Indonesia',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        // Edit Profile Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const ProfileSettingsPage()),
-                              );
-                            },
-                            icon: const Icon(Icons.edit),
-                            label: const Text('Edit Profil'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Badges
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildBadge('⭐', 'Early Adopter',
-                                  Colors.purple.shade100,
-                                  Colors.purple.shade600),
-                              const SizedBox(width: 8),
-                              _buildBadge('📅', '7-Day Streak',
-                                  Colors.orange.shade100,
-                                  Colors.orange.shade600),
-                              const SizedBox(width: 8),
-                              _buildBadge('✅', '20 Check-ins',
-                                  Colors.green.shade100,
-                                  Colors.green.shade600),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade700, Colors.blue.shade500],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
-            // Mental Health Score Card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                color: Colors.purple.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header with title and emoji
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Skor Kesehatan Mental',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16, bottom: 40),
+                child: Column(
+                  children: [
+                    // Back button
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back, 
+                            color: Colors.white,
+                            size: 24,
                           ),
-                          Container(
-                            padding: const EdgeInsets.all(8),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ),
+                    // Title
+                    const Text(
+                      'Pengaturan',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Profile Section
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Avatar
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white,
+                          backgroundImage: user?.profileImagePath != null
+                              ? NetworkImage(user!.profileImagePath!)
+                              : null,
+                          child: user?.profileImagePath == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Colors.purple.shade600,
+                                )
+                              : null,
+                        ),
+                        // Edit icon
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.purple.shade100,
+                              color: Colors.blue.shade600,
                               shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 3,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.emoji_emotions,
-                              color: Colors.purple.shade600,
-                              size: 20,
+                            padding: const EdgeInsets.all(8),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 18,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Score display
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '78',
-                            style: TextStyle(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple.shade600,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '/100',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Progress bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: 0.78,
-                          minHeight: 8,
-                          backgroundColor: Colors.grey.shade300,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.black.withValues(alpha: 0.8),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Trend
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.trending_up,
-                            color: Colors.green.shade600,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '+5 poin dari minggu lalu',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.green.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(height: 1),
-                      const SizedBox(height: 16),
-                      // Mood details row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildMoodDetailColumn(
-                            'Mood',
-                            'Baik 😊',
-                            Colors.black,
-                          ),
-                          _buildMoodDetailColumn(
-                            'Stres Level',
-                            'Rendah',
-                            Colors.green,
-                          ),
-                          _buildMoodDetailColumn(
-                            'Kualitas Tidur',
-                            '7.5 jam',
-                            Colors.black,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Emergency Contact Section (if exists)
-            if (settings.emergencyContactName != null ||
-                settings.emergencyContactPhone != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Kontak Darurat',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (settings.emergencyContactName != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.person_outline,
-                                  size: 18,
-                                  color: Colors.grey[600],
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    settings.emergencyContactName ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (settings.emergencyContactPhone != null)
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.phone_outlined,
-                                size: 18,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  settings.emergencyContactPhone ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 24),
-            // Dark Mode Toggle Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Dark Mode',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Gunakan tema gelap',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(height: 16),
+                    // User name
+                    Text(
+                      user?.fullName ?? settings.userName ?? 'Sarah Anderson',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      Transform.scale(
-                        scale: 0.8,
-                        child: Switch(
-                          value: settings.darkModeEnabled,
-                          onChanged: (value) async {
-                            settings.darkModeEnabled = value;
-                            await settings.save();
-                            setState(() {});
-                          },
-                          activeThumbColor: Colors.indigo.shade600,
-                          activeTrackColor:
-                              Colors.indigo.shade200,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Email
+                    Text(
+                      user?.email ?? 'sarah.anderson@email.com',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            // Logout/Login Button
+            // Account Section dengan menu
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text(
+                    'AKUN',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Edit Profil
+                  _buildMenuCard(
+                    icon: Icons.person_outline,
+                    iconColor: Colors.purple.shade200,
+                    iconBackgroundColor: Colors.purple.shade100,
+                    title: 'Edit Profil',
+                    subtitle: 'Ubah nama, email, dan info pribadi',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileSettingsPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Keamanan
+                  _buildMenuCard(
+                    icon: Icons.lock_outline,
+                    iconColor: Colors.blue.shade600,
+                    iconBackgroundColor: Colors.blue.shade100,
+                    title: 'Keamanan',
+                    subtitle: 'Password dan autentikasi',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileSettingsPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Pencapaian & Badge
+                  _buildMenuCard(
+                    icon: Icons.bookmark_outline,
+                    iconColor: Colors.orange.shade600,
+                    iconBackgroundColor: Colors.orange.shade100,
+                    title: 'Pencapaian & Badge',
+                    subtitle: 'Lihat semua pencapaianmu',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Pencapaian & Badge sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  // Data Kesehatan Section
+                  const Text(
+                    'DATA KESEHATAN',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Riwayat Check-in
+                  _buildMenuCard(
+                    icon: Icons.favorite_outline,
+                    iconColor: Colors.pink.shade600,
+                    iconBackgroundColor: Colors.pink.shade100,
+                    title: 'Riwayat Check-in',
+                    subtitle: 'Lihat semua hasil screening',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Riwayat Check-in sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Kalender Mood
+                  _buildMenuCard(
+                    icon: Icons.calendar_today_outlined,
+                    iconColor: Colors.green.shade600,
+                    iconBackgroundColor: Colors.green.shade100,
+                    title: 'Kalender Mood',
+                    subtitle: 'Tracking mood bulanan',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Kalender Mood sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Export Data
+                  _buildMenuCard(
+                    icon: Icons.file_present_outlined,
+                    iconColor: Colors.blue.shade600,
+                    iconBackgroundColor: Colors.blue.shade100,
+                    title: 'Export Data',
+                    subtitle: 'Download data kesehatan mental',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Export Data sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  // Preferensi Section
+                  const Text(
+                    'PREFERENSI',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Notifikasi
+                  _buildPreferenceCard(
+                    icon: Icons.notifications_outlined,
+                    iconColor: Colors.orange.shade600,
+                    iconBackgroundColor: Colors.orange.shade100,
+                    title: 'Notifikasi',
+                    subtitle: 'Penggiat check-in harian',
+                    isToggle: true,
+                    toggleValue: true,
+                    onToggleChanged: (value) {
+                      settings.dailyReminderEnabled = value;
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Mode Gelap
+                  _buildPreferenceCard(
+                    icon: Icons.nights_stay_outlined,
+                    iconColor: Colors.grey.shade600,
+                    iconBackgroundColor: Colors.grey.shade100,
+                    title: 'Mode Gelap',
+                    subtitle: 'Tema gelap untuk mata',
+                    isToggle: true,
+                    toggleValue: settings.darkModeEnabled,
+                    onToggleChanged: (value) async {
+                      settings.darkModeEnabled = value;
+                      await settings.save();
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Pengingat Harian
+                  _buildPreferenceCard(
+                    icon: Icons.calendar_today_outlined,
+                    iconColor: Colors.cyan.shade600,
+                    iconBackgroundColor: Colors.cyan.shade100,
+                    title: 'Pengingat Harian',
+                    subtitle: 'Reminder pukul 09:00',
+                    isToggle: true,
+                    toggleValue: true,
+                    onToggleChanged: (value) {
+                      settings.dailyReminderEnabled = value;
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Bahasa
+                  _buildPreferenceCard(
+                    icon: Icons.public_outlined,
+                    iconColor: Colors.blue.shade600,
+                    iconBackgroundColor: Colors.blue.shade100,
+                    title: 'Bahasa',
+                    subtitle: 'Bahasa Indonesia',
+                    isToggle: false,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Pengaturan Bahasa sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Tema Warna
+                  _buildPreferenceCard(
+                    icon: Icons.palette_outlined,
+                    iconColor: Colors.purple.shade600,
+                    iconBackgroundColor: Colors.purple.shade100,
+                    title: 'Tema Warna',
+                    subtitle: 'Personalisasi tampilan',
+                    isToggle: false,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Tema Warna sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  // Bantuan & Dukungan Section
+                  const Text(
+                    'BANTUAN & DUKUNGAN',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Pusat Bantuan
+                  _buildMenuCard(
+                    icon: Icons.help_outline,
+                    iconColor: Colors.cyan.shade600,
+                    iconBackgroundColor: Colors.cyan.shade100,
+                    title: 'Pusat Bantuan',
+                    subtitle: 'FAQ dan panduan',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Pusat Bantuan sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Hubungi Kami
+                  _buildMenuCard(
+                    icon: Icons.chat_bubble_outline,
+                    iconColor: Colors.green.shade600,
+                    iconBackgroundColor: Colors.green.shade100,
+                    title: 'Hubungi Kami',
+                    subtitle: 'Chat dengan tim support',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Hubungi Kami sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Feedback
+                  _buildMenuCard(
+                    icon: Icons.mail_outline,
+                    iconColor: Colors.red.shade600,
+                    iconBackgroundColor: Colors.red.shade100,
+                    title: 'Feedback',
+                    subtitle: 'Beri masukan untuk aplikasi',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Feedback sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  // Tentang Section
+                  const Text(
+                    'TENTANG',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Privasi & Keamanan
+                  _buildMenuCard(
+                    icon: Icons.shield_outlined,
+                    iconColor: Colors.teal.shade600,
+                    iconBackgroundColor: Colors.teal.shade100,
+                    title: 'Privasi & Keamanan',
+                    subtitle: 'Kebijakan privasi data',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Privasi & Keamanan sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Syarat & Ketentuan
+                  _buildMenuCard(
+                    icon: Icons.description_outlined,
+                    iconColor: Colors.orange.shade600,
+                    iconBackgroundColor: Colors.orange.shade100,
+                    title: 'Syarat & Ketentuan',
+                    subtitle: 'Ketentuan penggunaan',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Syarat & Ketentuan sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Tentang InsighMind
+                  _buildMenuCard(
+                    icon: Icons.info_outline,
+                    iconColor: Colors.blue.shade600,
+                    iconBackgroundColor: Colors.blue.shade100,
+                    title: 'Tentang InsighMind',
+                    subtitle: 'Versi 1.0.0',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fitur Tentang InsightMind sedang dikembangkan'),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  // Logout/Login Button
                   if (user == null) ...[
                     SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: FilledButton(
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4A5FD9),
+                          backgroundColor: Colors.blue.shade600,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -501,7 +475,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const LoginPage()),
+                              builder: (_) => const LoginPage(),
+                            ),
                           );
                         },
                         child: const Text(
@@ -523,14 +498,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          side: const BorderSide(
-                              color: Color(0xFF4A5FD9), width: 2),
+                          side: BorderSide(
+                            color: Colors.blue.shade600,
+                            width: 2,
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const RegisterPage()),
+                              builder: (_) => const RegisterPage(),
+                            ),
                           );
                         },
                         child: const Text(
@@ -538,7 +516,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF4A5FD9),
+                            color: Colors.blue,
                           ),
                         ),
                       ),
@@ -549,7 +527,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       height: 48,
                       child: FilledButton(
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4A5FD9),
+                          backgroundColor: Colors.red.shade600,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -567,7 +545,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             );
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (_) => const LoginPage()),
+                                builder: (_) => const LoginPage(),
+                              ),
                             );
                           }
                         },
@@ -582,72 +561,181 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBadge(
-    String icon,
-    String label,
-    Color backgroundColor,
-    Color textColor,
-  ) {
+  Widget _buildPreferenceCard({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBackgroundColor,
+    required String title,
+    required String subtitle,
+    required bool isToggle,
+    bool toggleValue = false,
+    Function(bool)? onToggleChanged,
+    VoidCallback? onTap,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: textColor,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: !isToggle ? onTap : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconBackgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isToggle)
+                  Switch(
+                    value: toggleValue,
+                    onChanged: onToggleChanged,
+                    activeThumbColor: Colors.white,
+                    activeTrackColor: Colors.black87,
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: Colors.grey.shade300,
+                  )
+                else
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.grey.shade400,
+                    size: 24,
+                  ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildMoodDetailColumn(
-    String label,
-    String value,
-    Color valueColor,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
+  Widget _buildMenuCard({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBackgroundColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconBackgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.grey.shade400,
+                  size: 24,
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: valueColor,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
+
